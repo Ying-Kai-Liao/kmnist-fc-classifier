@@ -1,6 +1,6 @@
 # KMNIST Fully-Connected Classifier
 
-**95.96% test accuracy** on Kuzushiji-MNIST using only fully-connected layers — surpassing the published simple CNN benchmark (94.63%).
+**96.84% test accuracy** on Kuzushiji-MNIST using only fully-connected layers — surpassing the published simple CNN benchmark (94.63%).
 
 ## Overview
 
@@ -12,10 +12,13 @@ A hypothesis-driven study of fully-connected neural networks for handwritten Hir
 |---|---|---|---|---|---|---|
 | 1: Baseline | 784-256-10 | 204k | 60k | 3.4:1 | 87.75% | 9.12% |
 | 2: +Dropout | 784-512-256-10 | 536k | 60k | 8.9:1 | 90.87% | 7.26% |
-| 3: Optimised | 784-1024-512-256-10 | 1.46M | 60k | 24.4:1 | 93.39% | 6.58% |
-| 4: +3x Aug | 784-1024-512-256-10 | 1.46M | 180k | 8.1:1 | 93.32% | 6.49% |
-| 5: +12x Aug | 784-1024-512-256-10 | 1.46M | 720k | 2.0:1 | 95.34% | 3.84% |
-| **6: +18x Aug** | **784-1024-512-256-10** | **1.46M** | **1.08M** | **1.4:1** | **95.96%** | **2.84%** |
+| 3: Optimised | 784-1024-512-256-10 | 1.46M | 60k | 24.4:1 | 93.61% | 6.58% |
+| 4: +3x Pre-gen Aug | 784-1024-512-256-10 | 1.46M | 180k | 8.1:1 | 93.56% | 6.49% |
+| 5: +12x Pre-gen Aug | 784-1024-512-256-10 | 1.46M | 720k | 2.0:1 | 95.44% | 3.91% |
+| 6: +18x Pre-gen Aug | 784-1024-512-256-10 | 1.46M | 1.08M | 1.4:1 | 95.96% | 2.84% |
+| **7: On-the-fly Aug** | **784-1024-512-256-10** | **1.46M** | **infinite** | **-** | **96.84%** | **-** |
+| 8: Deeper +OTF Aug | 784-1152-512-256-128-10 | 1.66M | infinite | - | 96.32% | - |
+| 9: Smaller +OTF Aug | 784-896-448-224-10 | 1.21M | infinite | - | 96.52% | - |
 
 ## Key Findings
 
@@ -31,8 +34,11 @@ Experiment 4 (3x augmented, 180k images) produced virtually no improvement over 
 ### Architecture: Pyramid Rule Works
 The geometric pyramid rule (Masters, 1993) — halving width each layer — proved effective. The tapering design (1024 -> 512 -> 256) forces hierarchical abstraction. Larger (+13.5%) and deeper architectures showed no improvement, confirming an optimal capacity exists for this task.
 
-### Pre-Generated vs On-the-Fly Augmentation
-Pre-generating augmented copies as GPU tensors is fast but creates fixed data that can be memorised. On-the-fly augmentation (regenerating random transforms each epoch) provides infinite diversity and showed promising results in later experiments (Exp 7-9).
+### On-the-Fly Beats Pre-Generated Augmentation
+Pre-generating augmented copies as GPU tensors is fast but creates fixed data that can be memorised. On-the-fly augmentation (regenerating random transforms each epoch) provides infinite diversity and achieved the best result: **96.84%** (Exp 7), outperforming even 18x pre-generated copies (95.96%, Exp 6).
+
+### Optimal Architecture Size
+Exp 8 (larger, +13.5% params) and Exp 9 (smaller, -17.4% params) both underperformed the original architecture in Exp 7. The 1024-512-256 pyramid following the geometric rule (Masters, 1993) is the sweet spot for this task.
 
 ## Architecture
 
@@ -62,7 +68,6 @@ Gradient Clipping: max_norm=1.0
 notebooks/
   01-data-exploration.ipynb   # Dataset visualisation and analysis
   02-experiments.ipynb        # All 9 experiments with hypothesis testing
-  03-part-a-perceptron.ipynb  # Perceptron from scratch (NumPy only)
 report/
   report.pdf                  # Full written report with analysis
 figures/                      # All experiment charts and confusion matrices
