@@ -1,0 +1,16 @@
+# Data
+*.npz
+kmnist_data/
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Word temp files
+~$*.docx
